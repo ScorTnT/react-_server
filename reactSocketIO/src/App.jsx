@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 function App() {
   const [socket, setSocket] = useState();
   const [userName, setUserName] = useState('');
-  function connectToServer(e){
+  function connectToServer(){
     console.log(`connectToServer`);
     const _socket = io('http://localhost:3000',{
       autoConnect: false,
@@ -21,6 +21,23 @@ function App() {
     console.log(`disConnectToServer`);
     socket?.disconnect();
   }
+
+  function onConnected(){
+    console.log('front - on connected')
+  }  
+  function disConnected(){
+    console.log('front - on disconnected')
+  }
+  useEffect(()=>{
+    console.log('useEffect called');
+    socket?.on('connect', onConnected);
+    socket?.on('disconnect', disConnected);
+    return() =>{
+      //clean up function ...
+      socket?.off('connect', onConnected);
+      socket?.on('disconnect', disConnected);
+    };
+  },[socket]);
   return (
     <>
       <div>
