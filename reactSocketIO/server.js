@@ -12,13 +12,19 @@ const io = new Server(server, {
 });
 
 io.on('connection',(client) => {
-    console.log(client.handshake.query.userName);
-    console.log(`connection success ${client.handshake.query.userName}`);
+    const connectedUserName = client.handshake.query.user;
+    console.log(`connection success user: ${connectedUserName}`);
+
+    client.broadcast.emit('new message',{ user: "root", msg:`[${connectedUserName}] enter!`});
+
     client.on('new message',(data)=>{
-        console.log(data.user, "|", data.msg);
+        console.log(data);
+        // console.log(data.user, "|", data.msg);
+        io.emit('new message', {user: data.user, msg: data.msg});
     })
     client.on('disconnect', ()=>{
-        console.log(`disconnect ${client.handshake.query.userName}`);
+        console.log(`disconnect ${connectedUserName}`);
+        io.emit('new message',{ user: "root", msg:`[${connectedUserName}] exit!`});
     });
 });
 

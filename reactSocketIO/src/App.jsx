@@ -7,16 +7,17 @@ import './App.css'
 function App() {
   const [socket, setSocket] = useState();
   const [userName, setUserName] = useState('');
-  const [inUserName,setInUserName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const [userInput, setUserInput] = useState('');
 
   function connectToServer(){
+    if(userName==='') return;
     console.log(`connectToServer`);
     const _socket = io('http://localhost:3000',{
       autoConnect: false,
       query: {
-        userName: userName,
+        user: userName,
       }
     });
     _socket.connect();
@@ -29,27 +30,33 @@ function App() {
   }
 
   function onConnected(){
-    console.log('front - on connected')
+    console.log('front - on connected');
     setIsConnected(true);
   }  
   function disConnected(){
-    console.log('front - on disconnected')
+    console.log('front - on disconnected');
     setIsConnected(false);
   }
   function sendMsgToServer(){
+    if(userInput==='') return;
     console.log(`msg front input: ${userInput}`);
-    socket?.emit('new message',{user:userName, msg:userInput},(response)=>{
+    socket?.emit("new message",{user:userName, msg:userInput},(response)=>{
       console.log(response);
     });
   }
+  function onMessageReceived(msg){
+    console.log(msg);
+  }
   useEffect(()=>{
-    console.log('useEffect called');
+    // console.log('useEffect called');
     socket?.on('connect', onConnected);
     socket?.on('disconnect', disConnected);
+    socket?.on('new message', onMessageReceived);
     return() =>{
       //clean up function ...
       socket?.off('connect', onConnected);
-      socket?.on('disconnect', disConnected);
+      socket?.off('disconnect', disConnected);
+      socket?.off('new message', onMessageReceived);
     };
   },[socket]);
   return (
@@ -64,20 +71,25 @@ function App() {
       </div>
       <h1>User :{userName}</h1>
       <h2>접속상태 :{isConnected ? "접속중" : "미접속"}</h2>
+
       <div className="card">
-        <input value={inUserName} onChange={e => setInUserName(e.target.value)}/>
-        <button onClick={function(e){
-          if(inUserName === '') return;
+        <input placeholder = "user name" value={userName} onChange={e => setUserName(e.target.value)}/>
+        <button onClick={function(){
+          if(userName === '') {
+            alert("put user name");
+            return;
+          }
+          if(isConnected === true) { alert(`already connected name:${lastName}`); return; }
+          setLastName(userName);
           connectToServer();
-          setUserName(inUserName);
-          e.preventDefault();
+          onConnected();
         }}>
           접속
         </button>
-        <button onClick={function(e){
+        <button onClick={function(){
+          disConnected();
           disConnectToServer();
           setUserName('');
-          e.preventDefault();
         }}>
           접속 종료
         </button>
@@ -85,11 +97,14 @@ function App() {
           Edit <code>src/App.jsx</code> and save to test HMR
         </p> */}
       </div>
+
       <div className="card">
-        <input type="text" value={userInput} onChange={e => setUserInput(e.target.value)}/>
+        <input type="text" placeholder='message' value={userInput} onChange={e => setUserInput(e.target.value)}/>
         <button onClick={function(){
-          if(isConnected === false) return;
+          if(isConnected === false) { return; }
+          if(userName !== lastName) { return; }
           sendMsgToServer();
+          setUserInput('');
         }}>
           보내기
         </button>
