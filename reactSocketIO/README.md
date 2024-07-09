@@ -12,6 +12,8 @@ Currently, two official plugins are available:
 
 cmd on root directory 
 > node server.js 
+
 run server. first,
 > npm run dev
+
 run front.
