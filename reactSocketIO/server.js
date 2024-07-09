@@ -13,7 +13,10 @@ const io = new Server(server, {
 
 io.on('connection',(client) => {
     console.log(client.handshake.query.userName);
-    console.log(`connection success ${client.handshake.query.userName}'`);
+    console.log(`connection success ${client.handshake.query.userName}`);
+    client.on('new message',(data)=>{
+        console.log(data.user, "|", data.msg);
+    })
     client.on('disconnect', ()=>{
         console.log(`disconnect ${client.handshake.query.userName}`);
     });

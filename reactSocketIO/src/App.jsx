@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { io } from "socket.io-client";
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import { io } from "socket.io-client";
+
 function App() {
   const [socket, setSocket] = useState();
   const [userName, setUserName] = useState('');
@@ -37,6 +38,9 @@ function App() {
   }
   function sendMsgToServer(){
     console.log(`msg front input: ${userInput}`);
+    socket?.emit('new message',{user:userName, msg:userInput},(response)=>{
+      console.log(response);
+    });
   }
   useEffect(()=>{
     console.log('useEffect called');
