@@ -9,7 +9,8 @@ function App() {
   const [userName, setUserName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isConnected, setIsConnected] = useState(false);
-  const [userInput, setUserInput] = useState('');
+  const [userMsg, setUserMsg] = useState('');
+  const [chatMsg,setChatMsg] = useState([]);
 
   function connectToServer(){
     if(userName==='') return;
@@ -23,12 +24,10 @@ function App() {
     _socket.connect();
     setSocket(_socket);
   }
-
   function disConnectToServer(){
     console.log(`disConnectToServer`);
     socket?.disconnect();
   }
-
   function onConnected(){
     console.log('front - on connected');
     setIsConnected(true);
@@ -38,15 +37,25 @@ function App() {
     setIsConnected(false);
   }
   function sendMsgToServer(){
-    if(userInput==='') return;
-    console.log(`msg front input: ${userInput}`);
-    socket?.emit("new message",{user:userName, msg:userInput},(response)=>{
+    if(userMsg==='') return;
+    console.log(`msg front input: ${userMsg}`);
+    socket?.emit("new message",{user:userName, msg:userMsg},(response)=>{
       console.log(response);
     });
   }
   function onMessageReceived(msg){
     console.log(msg);
+    setChatMsg(previous=>[...previous,msg]);
   }
+
+  useEffect(()=>{
+    console.log("스크롤 올리기.");
+    window.scrollTo({
+      top:document.body.scrollHeight,
+      left:0,
+      behavior:"smooth"
+    })
+  });
   useEffect(()=>{
     // console.log('useEffect called');
     socket?.on('connect', onConnected);
@@ -59,6 +68,15 @@ function App() {
       socket?.off('new message', onMessageReceived);
     };
   },[socket]);
+
+  const msgList = chatMsg.map((msg, index)=>
+    <li key={index}>
+      {msg.user} : {msg.msg}
+    </li>
+  );
+  
+  var chattingBox = isConnected ? <><ul>{msgList}</ul></> : <></>;
+
   return (
     <>
       <div>
@@ -69,17 +87,23 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>User :{userName}</h1>
-      <h2>접속상태 :{isConnected ? "접속중" : "미접속"}</h2>
+      <h1>User :{ userName }</h1>
+      <h2>접속상태 :{ isConnected ? "접속중" : "미접속"}</h2>
 
       <div className="card">
-        <input placeholder = "user name" value={userName} onChange={e => setUserName(e.target.value)}/>
+        <input placeholder = "user name" value={ userName } onChange={e => setUserName(e.target.value)}/>
         <button onClick={function(){
           if(userName === '') {
             alert("put user name");
             return;
           }
-          if(isConnected === true) { alert(`already connected name:${lastName}`); return; }
+          if(isConnected === true) { 
+            if(lastName===userName) alert("already connected");
+            else
+              var result = confirm(`already connected on name:[${ lastName }]\nconfirm to change your name`);
+              if(result==true) setUserName(lastName); 
+            return; 
+          }
           setLastName(userName);
           connectToServer();
           onConnected();
@@ -99,15 +123,23 @@ function App() {
       </div>
 
       <div className="card">
-        <input type="text" placeholder='message' value={userInput} onChange={e => setUserInput(e.target.value)}/>
+        <input type="text" placeholder='message' value={ userMsg } onChange={e => setUserMsg(e.target.value)}/>
         <button onClick={function(){
-          if(isConnected === false) { return; }
-          if(userName !== lastName) { return; }
+          if(isConnected === false) { alert(`connect to server first`); return; }
+          if(userName !== lastName) { 
+            var result = confirm(`user name error!\nYour name:[${lastName}]\nconfirm to change your name`); 
+            if(result==true) setUserName(lastName);
+             return; 
+          }
           sendMsgToServer();
-          setUserInput('');
+          setUserMsg('');
         }}>
           보내기
         </button>
+      </div>
+
+      <div className="card">
+        {chattingBox}
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
