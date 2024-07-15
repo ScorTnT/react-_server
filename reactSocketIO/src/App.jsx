@@ -27,6 +27,7 @@ function App() {
   function disConnectToServer(){
     console.log(`disConnectToServer`);
     socket?.disconnect();
+    setChatMsg([]);
   }
   function onConnected(){
     console.log('front - on connected');
@@ -47,7 +48,7 @@ function App() {
     console.log(msg);
     setChatMsg(previous=>[...previous,msg]);
   }
-
+  
   useEffect(()=>{
     console.log("스크롤 올리기.");
     window.scrollTo({
@@ -68,7 +69,7 @@ function App() {
       socket?.off('new message', onMessageReceived);
     };
   },[socket]);
-
+  
   const msgList = chatMsg.map((msg, index)=>
     <li key={index}>
       {msg.user} : {msg.msg}
@@ -76,7 +77,7 @@ function App() {
   );
   
   var chattingBox = isConnected ? <><ul>{msgList}</ul></> : <></>;
-
+  
   return (
     <>
       <div>
