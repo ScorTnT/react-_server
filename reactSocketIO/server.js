@@ -3,8 +3,10 @@ import express from "express";
 import * as http from "http";
 import ViteExpress from "vite-express";
 
+const serverPort = 3000;    ////////
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
     cors: {
         origin: "*"
@@ -28,8 +30,8 @@ io.on('connection',(client) => {
     });
 });
 
-server.listen(3000, ()=>{
-    console.log('Listen on 3000 port'); 
+server.listen(serverPort, ()=>{
+    console.log(`Listen on ${serverPort} port`); 
 });
 
 // routing page
