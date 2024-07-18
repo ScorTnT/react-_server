@@ -5,6 +5,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
+  
   const [socket, setSocket] = useState();
   const [userName, setUserName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -50,12 +51,11 @@ function App() {
   }
   
   useEffect(()=>{
-    console.log("스크롤 올리기.");
     window.scrollTo({
       top:document.body.scrollHeight,
       left:0,
       behavior:"smooth"
-    })
+    });
   });
   useEffect(()=>{
     // console.log('useEffect called');
@@ -77,7 +77,7 @@ function App() {
   );
   
   var chattingBox = isConnected ? <><ul>{msgList}</ul></> : <></>;
-  
+
   return (
     <>
       <div>
@@ -101,14 +101,14 @@ function App() {
           if(isConnected === true) { 
             if(lastName===userName) alert("already connected");
             else
-              var result = confirm(`already connected on name:[${ lastName }]\nconfirm to change your name`);
-              if(result==true) setUserName(lastName); 
-            return; 
-          }
-          setLastName(userName);
-          connectToServer();
-          onConnected();
-        }}>
+            var result = confirm(`already connected on name:[${ lastName }]\nconfirm to change your name`);
+          if(result==true) setUserName(lastName); 
+          return; 
+        }
+        setLastName(userName);
+        connectToServer();
+        onConnected();
+      }}>
           접속
         </button>
         <button onClick={function(){
@@ -120,7 +120,7 @@ function App() {
         </button>
         {/* <p>
           Edit <code>src/App.jsx</code> and save to test HMR
-        </p> */}
+          </p> */}
       </div>
 
       <div className="card">
@@ -130,7 +130,7 @@ function App() {
           if(userName !== lastName) { 
             var result = confirm(`user name error!\nYour name:[${lastName}]\nconfirm to change your name`); 
             if(result==true) setUserName(lastName);
-             return; 
+            return; 
           }
           sendMsgToServer();
           setUserMsg('');
